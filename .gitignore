@@ -1,0 +1,27 @@
+# Secret environment variables
+.env
+
+# Virtual environment
+.venv/
+venv/
+
+# Python temporary files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated reports
+reports/
+*.pdf
+
+# Editor settings
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db

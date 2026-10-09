@@ -1,0 +1,16 @@
+shipment_number,origin,destination,distance_km,dispatch_delay_hours,days_remaining,documentation_complete,vehicle_available,priority,transport_type,current_stage
+SH-3001,Jeddah,Riyadh,950,12,1,false,false,high,road,processing
+SH-3002,Jeddah,Makkah,85,0,4,true,true,medium,road,ready
+SH-3003,Riyadh,Dammam,410,3,2,true,true,high,road,dispatched
+SH-3004,Dammam,Jubail,95,0,5,true,true,low,road,in_transit
+SH-3005,Jeddah,Tabuk,1020,8,1,false,true,high,road,processing
+SH-3006,Riyadh,Jeddah,950,1,5,true,true,medium,air,ready
+SH-3007,Jubail,Riyadh,470,6,2,true,false,high,road,processing
+SH-3008,Medina,Jeddah,420,0,3,true,true,medium,road,in_transit
+SH-3009,Dammam,Abha,1450,15,1,false,false,high,road,processing
+SH-3010,Riyadh,Qassim,330,2,4,true,true,low,road,dispatched
+SH-3011,Jeddah,Dammam,1350,7,2,false,true,high,sea,processing
+SH-3012,Abha,Jizan,200,0,5,true,true,low,road,ready
+SH-3013,Tabuk,Medina,680,4,3,true,false,medium,road,processing
+SH-3014,Jeddah,NEOM,1050,9,1,false,false,high,road,ready
+SH-3015,Riyadh,AlKharj,100,0,6,true,true,low,road,in_transit

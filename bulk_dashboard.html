@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Bulk Shipment Analysis</title>
+
+    <style>
+        :root {
+            --navy: #102a43;
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --teal: #0f766e;
+            --green: #15803d;
+            --yellow: #ca8a04;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --background: #f3f7fb;
+            --white: #ffffff;
+            --border: #dbe4ee;
+            --text: #243b53;
+            --muted: #64748b;
+            --shadow:
+                0 12px 35px rgba(15, 23, 42, 0.09);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                "Segoe UI",
+                Tahoma,
+                Arial,
+                sans-serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .header {
+            padding: 28px 5%;
+            background:
+                linear-gradient(
+                    135deg,
+                    #102a43,
+                    #155e75
+                );
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: clamp(
+                26px,
+                4vw,
+                38px
+            );
+        }
+
+        .header p {
+            margin: 0;
+            color: #d9f4ff;
+            line-height: 1.6;
+        }
+
+        .header-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-link {
+            display: inline-block;
+            padding: 10px 15px;
+            border: 1px solid
+                rgba(255, 255, 255, 0.45);
+            border-radius: 9px;
+            color: white;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .header-link:hover {
+            background:
+                rgba(255, 255, 255, 0.13);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 0 20px 50px;
+        }
+
+        .info-box {
+            margin-bottom: 22px;
+            padding: 16px 18px;
+            border-left: 5px solid
+                var(--blue);
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            line-height: 1.7;
+        }
+
+        .card {
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            border-radius: 17px;
+            background: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            padding: 20px 23px;
+            border-bottom:
+                1px solid var(--border);
+            background: #fbfdff;
+        }
+
+        .card-header h2 {
+            margin: 0 0 6px;
+            color: var(--navy);
+            font-size: 22px;
+        }
+
+        .card-header p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .upload-area {
+            padding: 48px 25px;
+            border: 2px dashed #94a3b8;
+            border-radius: 14px;
+            background: #f8fafc;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .upload-area.dragging {
+            border-color: var(--blue);
+            background: #eff6ff;
+        }
+
+        .upload-icon {
+            margin-bottom: 12px;
+            font-size: 42px;
+        }
+
+        .upload-area h3 {
+            margin: 0 0 8px;
+            color: var(--navy);
+        }
+
+        .upload-area p {
+            margin: 0 0 18px;
+            color: var(--muted);
+        }
+
+        #csvFile {
+            display: none;
+        }
+
+        .choose-button,
+        .upload-button,
+        .report-button {
+            display: inline-block;
+            padding: 12px 19px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .choose-button {
+            background: var(--teal);
+        }
+
+        .upload-button {
+            margin-left: 8px;
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--blue),
+                    var(--purple)
+                );
+        }
+
+        .report-button {
+            background: var(--navy);
+        }
+
+        .upload-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        .file-name {
+            min-height: 24px;
+            margin-top: 17px;
+            color: var(--navy);
+            font-weight: 700;
+        }
+
+        .format-box {
+            overflow-x: auto;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #d1fae5;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: nowrap;
+        }
+
+        .loading {
+            display: none;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            width: 46px;
+            height: 46px;
+            margin: 0 auto 15px;
+            border: 5px solid #e2e8f0;
+            border-top-color: var(--purple);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 18px;
+            padding: 14px;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            background: #fef2f2;
+            color: #991b1b;
+            line-height: 1.6;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .success-box {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #bbf7d0;
+            border-radius: 10px;
+            background: #f0fdf4;
+            color: #166534;
+            font-weight: 700;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 23px;
+        }
+
+        .stat-card {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .stat-label {
+            display: block;
+            margin-bottom: 9px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            color: var(--navy);
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .risk-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .risk-card {
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .risk-card strong {
+            display: block;
+            margin-top: 5px;
+            font-size: 30px;
+        }
+
+        .high-risk {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .medium-risk {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .low-risk {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .section-heading {
+            margin: 24px 0 12px;
+            color: var(--navy);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 13px;
+            border-bottom:
+                1px solid var(--border);
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            color: #334e68;
+            font-size: 13px;
+        }
+
+        td {
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .badge-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .error-list {
+            margin: 0;
+            padding-left: 22px;
+            color: #991b1b;
+            line-height: 1.7;
+        }
+
+        .result-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .dashboard-button {
+            display: inline-block;
+            padding: 12px 19px;
+            border-radius: 10px;
+            background: var(--teal);
+            color: white;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
+        @media (max-width: 800px) {
+            .header-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .risk-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .choose-button,
+            .upload-button {
+                display: block;
+                width: 100%;
+                margin: 9px 0 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <h1>Bulk Shipment Analysis</h1>
+
+                <p>
+                    Upload hundreds of shipments and identify
+                    operational risks automatically.
+                </p>
+            </div>
+
+            <div class="header-links">
+                <a
+                    class="header-link"
+                    href="/shipment-dashboard"
+                >
+                    Risk Dashboard
+                </a>
+
+                <a
+                    class="header-link"
+                    href="/docs"
+                >
+                    API Documentation
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="info-box">
+            Export shipment data from the company system as a
+            CSV file. The machine-learning model will analyze
+            every shipment, rank the risks, and save the
+            results in the risk register.
+        </div>
+
+        <section class="card">
+            <div class="card-header">
+                <h2>Upload Shipment File</h2>
+
+                <p>
+                    Maximum file size: 5 MB.
+                    Maximum rows: 5,000 shipments.
+                </p>
+            </div>
+
+            <div class="card-body">
+                <div
+                    id="uploadArea"
+                    class="upload-area"
+                >
+                    <div class="upload-icon">⇧</div>
+
+                    <h3>Choose or drop a CSV file</h3>
+
+                    <p>
+                        Only CSV files using the required
+                        column structure are accepted.
+                    </p>
+
+                    <input
+                        id="csvFile"
+                        type="file"
+                        accept=".csv,text/csv"
+                    >
+
+                    <label
+                        class="choose-button"
+                        for="csvFile"
+                    >
+                        Choose CSV File
+                    </label>
+
+                    <button
+                        id="uploadButton"
+                        class="upload-button"
+                        type="button"
+                        disabled
+                    >
+                        Analyze Shipments
+                    </button>
+
+                    <div
+                        id="fileName"
+                        class="file-name"
+                    >
+                        No file selected
+                    </div>
+                </div>
+
+                <div class="format-box">
+                    shipment_number, origin, destination,
+                    distance_km, dispatch_delay_hours,
+                    days_remaining, documentation_complete,
+                    vehicle_available, priority,
+                    transport_type, current_stage
+                </div>
+
+                <div
+                    id="errorMessage"
+                    class="error-message"
+                ></div>
+            </div>
+        </section>
+
+        <section
+            id="loading"
+            class="card loading"
+        >
+            <div class="spinner"></div>
+
+            <strong>
+                Analyzing shipment risks...
+            </strong>
+
+            <p>
+                Please wait while the model processes
+                the uploaded file.
+            </p>
+        </section>
+
+        <section
+            id="results"
+            class="card results"
+        >
+            <div class="card-header">
+                <h2>Bulk Analysis Results</h2>
+
+                <p>
+                    Summary of the uploaded shipment file.
+                </p>
+            </div>
+
+            <div class="card-body">
+                <div
+                    id="successMessage"
+                    class="success-box"
+                ></div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-label">
+                            Rows Received
+                        </span>
+
+                        <span
+                            id="rowsReceived"
+                            class="stat-value"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-label">
+                            Shipments Saved
+                        </span>
+
+                        <span
+                            id="shipmentsSaved"
+                            class="stat-value"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-label">
+                            Duplicates Skipped
+                        </span>
+
+                        <span
+                            id="duplicatesSkipped"
+                            class="stat-value"
+                        >
+                            0
+                        </span>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-label">
+                            Rows With Errors
+                        </span>
+
+                        <span
+                            id="rowsWithErrors"
+                            class="stat-value"
+                        >
+                            0
+                        </span>
+                    </div>
+                </div>
+
+                <div class="risk-grid">
+                    <div class="risk-card high-risk">
+                        High Risk
+                        <strong id="highCount">0</strong>
+                    </div>
+
+                    <div class="risk-card medium-risk">
+                        Medium Risk
+                        <strong id="mediumCount">0</strong>
+                    </div>
+
+                    <div class="risk-card low-risk">
+                        Low Risk
+                        <strong id="lowCount">0</strong>
+                    </div>
+                </div>
+
+                <h3 class="section-heading">
+                    Highest-Risk Shipments
+                </h3>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shipment</th>
+                                <th>Probability</th>
+                                <th>Risk Level</th>
+                                <th>Prediction</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="riskTableBody">
+                            <tr>
+                                <td colspan="4">
+                                    No results available.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="rowErrorsSection">
+                    <h3 class="section-heading">
+                        Row Errors
+                    </h3>
+
+                    <ul
+                        id="rowErrors"
+                        class="error-list"
+                    ></ul>
+                </div>
+
+                <div class="result-actions">
+                    <a
+                        class="dashboard-button"
+                        href="/shipment-dashboard"
+                    >
+                        Open Risk Dashboard
+                    </a>
+
+                    <a
+                        class="report-button"
+                        href="/shipments/report/pdf"
+                    >
+                        Download PDF Report
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const csvFile =
+            document.getElementById(
+                "csvFile"
+            );
+
+        const uploadButton =
+            document.getElementById(
+                "uploadButton"
+            );
+
+        const fileName =
+            document.getElementById(
+                "fileName"
+            );
+
+        const uploadArea =
+            document.getElementById(
+                "uploadArea"
+            );
+
+        const errorMessage =
+            document.getElementById(
+                "errorMessage"
+            );
+
+        const loading =
+            document.getElementById(
+                "loading"
+            );
+
+        const results =
+            document.getElementById(
+                "results"
+            );
+
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        csvFile.addEventListener(
+            "change",
+            function () {
+                selectFile(
+                    csvFile.files[0]
+                );
+            }
+        );
+
+
+        uploadArea.addEventListener(
+            "dragover",
+            function (event) {
+                event.preventDefault();
+
+                uploadArea.classList.add(
+                    "dragging"
+                );
+            }
+        );
+
+
+        uploadArea.addEventListener(
+            "dragleave",
+            function () {
+                uploadArea.classList.remove(
+                    "dragging"
+                );
+            }
+        );
+
+
+        uploadArea.addEventListener(
+            "drop",
+            function (event) {
+                event.preventDefault();
+
+                uploadArea.classList.remove(
+                    "dragging"
+                );
+
+                const selectedFile =
+                    event.dataTransfer.files[0];
+
+                if (!selectedFile) {
+                    return;
+                }
+
+                const dataTransfer =
+                    new DataTransfer();
+
+                dataTransfer.items.add(
+                    selectedFile
+                );
+
+                csvFile.files =
+                    dataTransfer.files;
+
+                selectFile(
+                    selectedFile
+                );
+            }
+        );
+
+
+        function selectFile(selectedFile) {
+            clearError();
+
+            if (!selectedFile) {
+                fileName.textContent =
+                    "No file selected";
+
+                uploadButton.disabled = true;
+                return;
+            }
+
+            if (
+                !selectedFile.name
+                    .toLowerCase()
+                    .endsWith(".csv")
+            ) {
+                showError(
+                    "Please select a CSV file."
+                );
+
+                csvFile.value = "";
+                fileName.textContent =
+                    "No file selected";
+
+                uploadButton.disabled = true;
+                return;
+            }
+
+            fileName.textContent =
+                selectedFile.name;
+
+            uploadButton.disabled = false;
+        }
+
+
+        uploadButton.addEventListener(
+            "click",
+            uploadFile
+        );
+
+
+        async function uploadFile() {
+            const selectedFile =
+                csvFile.files[0];
+
+            if (!selectedFile) {
+                showError(
+                    "Please choose a CSV file."
+                );
+                return;
+            }
+
+            clearError();
+
+            loading.classList.add(
+                "visible"
+            );
+
+            results.classList.remove(
+                "visible"
+            );
+
+            uploadButton.disabled = true;
+            uploadButton.textContent =
+                "Analyzing...";
+
+            const formData =
+                new FormData();
+
+            formData.append(
+                "file",
+                selectedFile
+            );
+
+            try {
+                const response = await fetch(
+                    "/shipments/bulk-upload",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Upload failed."
+                    );
+                }
+
+                displayResults(data);
+
+            } catch (error) {
+                showError(error.message);
+
+            } finally {
+                loading.classList.remove(
+                    "visible"
+                );
+
+                uploadButton.disabled = false;
+                uploadButton.textContent =
+                    "Analyze Shipments";
+            }
+        }
+
+
+        function displayResults(data) {
+            document.getElementById(
+                "successMessage"
+            ).textContent =
+                data.message;
+
+            document.getElementById(
+                "rowsReceived"
+            ).textContent =
+                data.rows_received;
+
+            document.getElementById(
+                "shipmentsSaved"
+            ).textContent =
+                data.shipments_saved;
+
+            document.getElementById(
+                "duplicatesSkipped"
+            ).textContent =
+                data.duplicates_skipped;
+
+            document.getElementById(
+                "rowsWithErrors"
+            ).textContent =
+                data.rows_with_errors;
+
+            const counts =
+                data.risk_counts || {};
+
+            document.getElementById(
+                "highCount"
+            ).textContent =
+                counts.high || 0;
+
+            document.getElementById(
+                "mediumCount"
+            ).textContent =
+                counts.medium || 0;
+
+            document.getElementById(
+                "lowCount"
+            ).textContent =
+                counts.low || 0;
+
+            renderRiskTable(
+                data.highest_risk_shipments || []
+            );
+
+            renderErrors(
+                data.row_errors || []
+            );
+
+            results.classList.add(
+                "visible"
+            );
+
+            results.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+
+
+        function getBadgeClass(
+            riskLevel
+        ) {
+            const risk = String(
+                riskLevel || ""
+            ).toLowerCase();
+
+            if (risk === "high") {
+                return "badge-high";
+            }
+
+            if (risk === "medium") {
+                return "badge-medium";
+            }
+
+            return "badge-low";
+        }
+
+
+        function renderRiskTable(
+            shipments
+        ) {
+            const tableBody =
+                document.getElementById(
+                    "riskTableBody"
+                );
+
+            if (shipments.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            No new shipments were saved.
+                            They may already exist in the
+                            database.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tableBody.innerHTML =
+                shipments.map(
+                    function (shipment) {
+                        return `
+                            <tr>
+                                <td>
+                                    <strong>
+                                        ${escapeHtml(
+                                            shipment
+                                                .shipment_number
+                                        )}
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    ${Number(
+                                        shipment
+                                            .delay_probability ||
+                                        0
+                                    ).toFixed(1)}%
+                                </td>
+
+                                <td>
+                                    <span
+                                        class="
+                                            risk-badge
+                                            ${getBadgeClass(
+                                                shipment
+                                                    .risk_level
+                                            )}
+                                        "
+                                    >
+                                        ${escapeHtml(
+                                            shipment
+                                                .risk_level
+                                        )}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    ${escapeHtml(
+                                        shipment
+                                            .prediction
+                                    )}
+                                </td>
+                            </tr>
+                        `;
+                    }
+                ).join("");
+        }
+
+
+        function renderErrors(
+            errors
+        ) {
+            const section =
+                document.getElementById(
+                    "rowErrorsSection"
+                );
+
+            const list =
+                document.getElementById(
+                    "rowErrors"
+                );
+
+            if (errors.length === 0) {
+                section.style.display =
+                    "none";
+                return;
+            }
+
+            section.style.display =
+                "block";
+
+            list.innerHTML =
+                errors.map(
+                    function (item) {
+                        return `
+                            <li>
+                                Row
+                                ${escapeHtml(item.row)}:
+                                ${escapeHtml(item.error)}
+                            </li>
+                        `;
+                    }
+                ).join("");
+        }
+
+
+        function showError(message) {
+            errorMessage.textContent =
+                message;
+
+            errorMessage.classList.add(
+                "visible"
+            );
+        }
+
+
+        function clearError() {
+            errorMessage.textContent = "";
+
+            errorMessage.classList.remove(
+                "visible"
+            );
+        }
+    </script>
+</body>
+</html>

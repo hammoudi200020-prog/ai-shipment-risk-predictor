@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Shipment Risk Predictor</title>
+
+    <style>
+        :root {
+            --navy: #102a43;
+            --blue: #2563eb;
+            --blue-dark: #1d4ed8;
+            --teal: #0f766e;
+            --green: #15803d;
+            --yellow: #ca8a04;
+            --red: #dc2626;
+            --red-dark: #991b1b;
+            --background: #f3f7fb;
+            --white: #ffffff;
+            --border: #dbe4ee;
+            --text: #243b53;
+            --muted: #64748b;
+            --shadow:
+                0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family:
+                "Segoe UI",
+                Tahoma,
+                Arial,
+                sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .page-header {
+            background:
+                linear-gradient(
+                    135deg,
+                    #0f2744,
+                    #155e75
+                );
+            color: white;
+            padding: 28px 5%;
+            box-shadow: var(--shadow);
+        }
+
+        .header-content {
+            max-width: 1450px;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 25px;
+        }
+
+        .header-title {
+            margin: 0 0 8px;
+            font-size: clamp(25px, 4vw, 39px);
+        }
+
+        .header-subtitle {
+            margin: 0;
+            color: #d9f4ff;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .header-link {
+            display: inline-block;
+            flex-shrink: 0;
+            padding: 11px 18px;
+            color: white;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .header-link:hover {
+            background: rgba(255, 255, 255, 0.13);
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 28px auto;
+            padding: 0 24px 50px;
+        }
+
+        .notice {
+            margin-bottom: 22px;
+            padding: 16px 18px;
+            border-left: 5px solid var(--blue);
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(5, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            display: block;
+            color: var(--navy);
+            font-size: 30px;
+            font-weight: 800;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns:
+                minmax(350px, 0.85fr)
+                minmax(460px, 1.15fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            background: #fbfdff;
+        }
+
+        .card-header h2 {
+            margin: 0 0 6px;
+            color: var(--navy);
+            font-size: 21px;
+        }
+
+        .card-header p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .card-body {
+            padding: 22px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 17px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            color: #334e68;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: white;
+            color: var(--text);
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--blue);
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, 0.13);
+        }
+
+        .checkbox-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            grid-column: 1 / -1;
+        }
+
+        .checkbox-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 45px;
+            padding: 11px 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+        }
+
+        .checkbox-box input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-box label {
+            cursor: pointer;
+        }
+
+        .primary-button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 13px 18px;
+            border: none;
+            border-radius: 10px;
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--blue),
+                    #0891b2
+                );
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                0 8px 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .primary-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.65;
+            transform: none;
+        }
+
+        .result-placeholder {
+            padding: 50px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .result-content {
+            display: none;
+        }
+
+        .result-content.visible {
+            display: block;
+        }
+
+        .result-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-heading h3 {
+            margin: 0;
+            color: var(--navy);
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 72px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .risk-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .risk-unknown {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .probability-panel {
+            padding: 18px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+        }
+
+        .probability-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .probability-value {
+            color: var(--navy);
+            font-size: 30px;
+            font-weight: 900;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            transition: width 0.6s ease;
+        }
+
+        .fill-low {
+            background: var(--green);
+        }
+
+        .fill-medium {
+            background: var(--yellow);
+        }
+
+        .fill-high {
+            background: var(--red);
+        }
+
+        .result-section {
+            margin-top: 20px;
+        }
+
+        .result-section h4 {
+            margin: 0 0 10px;
+            color: var(--navy);
+        }
+
+        .result-list {
+            margin: 0;
+            padding-left: 21px;
+            color: #475569;
+            line-height: 1.7;
+        }
+
+        .prediction-box {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #ecfeff;
+            color: #155e75;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .table-card {
+            margin-top: 24px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th,
+        td {
+            padding: 14px 13px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #334e68;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        td {
+            color: #475569;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #fbfdff;
+        }
+
+        .table-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .action-button {
+            padding: 8px 10px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .ai-button {
+            background:
+                linear-gradient(
+                    135deg,
+                    #7c3aed,
+                    #2563eb
+                );
+        }
+
+        .view-button {
+            background: var(--teal);
+        }
+
+        .delete-button {
+            background: var(--red);
+        }
+
+        .action-button:hover {
+            opacity: 0.88;
+        }
+
+        .status-select {
+            min-width: 125px;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .empty-table {
+            padding: 35px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .loading-text {
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            border: 1px solid #fecaca;
+            border-radius: 9px;
+            background: #fef2f2;
+            color: #991b1b;
+            line-height: 1.5;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            inset: 0;
+            padding: 25px;
+            background: rgba(15, 23, 42, 0.68);
+            overflow-y: auto;
+        }
+
+        .modal.visible {
+            display: block;
+        }
+
+        .modal-content {
+            max-width: 900px;
+            margin: 30px auto;
+            border-radius: 18px;
+            background: white;
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 21px 24px;
+            background:
+                linear-gradient(
+                    135deg,
+                    #4c1d95,
+                    #1d4ed8
+                );
+            color: white;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .close-button {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.16);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .ai-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .ai-summary-item {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #f8fafc;
+        }
+
+        .ai-summary-label {
+            display: block;
+            margin-bottom: 7px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .ai-summary-value {
+            color: var(--navy);
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+        .analysis-section {
+            margin-top: 17px;
+            padding: 17px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #ffffff;
+        }
+
+        .analysis-section h3 {
+            margin: 0 0 9px;
+            color: var(--navy);
+            font-size: 17px;
+        }
+
+        .analysis-section p {
+            margin: 0;
+            color: #475569;
+            line-height: 1.7;
+        }
+
+        .analysis-actions {
+            margin: 0;
+            padding-left: 22px;
+            color: #475569;
+            line-height: 1.8;
+        }
+
+        .urgency {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .urgency-critical {
+            background: #7f1d1d;
+            color: white;
+        }
+
+        .urgency-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .urgency-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .urgency-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .ai-loading {
+            padding: 50px 20px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            margin: 0 auto 17px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #7c3aed;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns:
+                    repeat(3, minmax(150px, 1fr));
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header-content {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 0 14px 35px;
+            }
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, minmax(130px, 1fr));
+            }
+
+            .form-grid,
+            .checkbox-row,
+            .ai-summary {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-content {
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-header">
+        <div class="header-content">
+            <div>
+                <h1 class="header-title">
+                    AI Shipment Delay & Risk Predictor
+                </h1>
+
+                <p class="header-subtitle">
+                    Predict shipment delays, identify operational
+                    risks, and generate AI-supported management actions.
+                </p>
+            </div>
+
+            <a class="header-link" href="/">
+                Operations Manager
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="notice">
+            <strong>Portfolio demonstration:</strong>
+            The prediction model was trained using synthetic data.
+            A production deployment would require retraining and
+            validation using the company's historical shipment data.
+        </div>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Shipments</span>
+                <span class="stat-value" id="totalShipments">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">High Risk</span>
+                <span class="stat-value" id="highRisk">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Medium Risk</span>
+                <span class="stat-value" id="mediumRisk">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Low Risk</span>
+                <span class="stat-value" id="lowRisk">0</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Average Delay Risk</span>
+                <span class="stat-value" id="averageRisk">0%</span>
+            </div>
+        </section>
+
+        <section class="main-grid">
+            <div class="card">
+                <div class="card-header">
+                    <h2>New Shipment Prediction</h2>
+                    <p>
+                        Enter the shipment's current operational data.
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <form id="predictionForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="shipmentNumber">
+                                    Shipment Number
+                                </label>
+
+                                <input
+                                    id="shipmentNumber"
+                                    type="text"
+                                    value="SH-1002"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="priority">
+                                    Priority
+                                </label>
+
+                                <select id="priority" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high" selected>
+                                        High
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="origin">Origin</label>
+
+                                <input
+                                    id="origin"
+                                    type="text"
+                                    value="Jeddah"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="destination">
+                                    Destination
+                                </label>
+
+                                <input
+                                    id="destination"
+                                    type="text"
+                                    value="Riyadh"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="distance">
+                                    Distance (km)
+                                </label>
+
+                                <input
+                                    id="distance"
+                                    type="number"
+                                    min="1"
+                                    value="950"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="dispatchDelay">
+                                    Dispatch Delay (hours)
+                                </label>
+
+                                <input
+                                    id="dispatchDelay"
+                                    type="number"
+                                    min="0"
+                                    value="10"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="daysRemaining">
+                                    Days Remaining
+                                </label>
+
+                                <input
+                                    id="daysRemaining"
+                                    type="number"
+                                    min="0"
+                                    value="1"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="transportType">
+                                    Transport Type
+                                </label>
+
+                                <select id="transportType" required>
+                                    <option value="road" selected>
+                                        Road
+                                    </option>
+                                    <option value="air">Air</option>
+                                    <option value="sea">Sea</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="currentStage">
+                                    Current Stage
+                                </label>
+
+                                <select id="currentStage" required>
+                                    <option value="processing" selected>
+                                        Processing
+                                    </option>
+                                    <option value="ready">
+                                        Ready
+                                    </option>
+                                    <option value="dispatched">
+                                        Dispatched
+                                    </option>
+                                    <option value="in_transit">
+                                        In Transit
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="checkbox-row">
+                                <div class="checkbox-box">
+                                    <input
+                                        id="documentationComplete"
+                                        type="checkbox"
+                                    >
+
+                                    <label for="documentationComplete">
+                                        Documentation complete
+                                    </label>
+                                </div>
+
+                                <div class="checkbox-box">
+                                    <input
+                                        id="vehicleAvailable"
+                                        type="checkbox"
+                                    >
+
+                                    <label for="vehicleAvailable">
+                                        Vehicle available
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button
+                            id="predictButton"
+                            class="primary-button"
+                            type="submit"
+                        >
+                            Predict Delay Risk
+                        </button>
+
+                        <div
+                            id="formError"
+                            class="error-message"
+                        ></div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Prediction Result</h2>
+                    <p>
+                        Machine-learning risk score and recommended
+                        operational actions.
+                    </p>
+                </div>
+
+                <div class="card-body">
+                    <div
+                        id="resultPlaceholder"
+                        class="result-placeholder"
+                    >
+                        Submit shipment data to generate a prediction.
+                    </div>
+
+                    <div
+                        id="resultContent"
+                        class="result-content"
+                    >
+                        <div class="result-heading">
+                            <h3 id="resultShipmentNumber">
+                                Shipment
+                            </h3>
+
+                            <span
+                                id="resultRiskBadge"
+                                class="risk-badge risk-unknown"
+                            >
+                                Unknown
+                            </span>
+                        </div>
+
+                        <div class="probability-panel">
+                            <div class="probability-top">
+                                <span>Delay Probability</span>
+
+                                <span
+                                    id="resultProbability"
+                                    class="probability-value"
+                                >
+                                    0%
+                                </span>
+                            </div>
+
+                            <div class="progress-track">
+                                <div
+                                    id="probabilityFill"
+                                    class="progress-fill"
+                                ></div>
+                            </div>
+                        </div>
+
+                        <div
+                            id="resultPrediction"
+                            class="prediction-box"
+                        ></div>
+
+                        <div class="result-section">
+                            <h4>Risk Factors</h4>
+
+                            <ul
+                                id="riskFactors"
+                                class="result-list"
+                            ></ul>
+                        </div>
+
+                        <div class="result-section">
+                            <h4>Recommended Actions</h4>
+
+                            <ul
+                                id="recommendedActions"
+                                class="result-list"
+                            ></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card table-card">
+            <div class="card-header">
+                <h2>Shipment Risk Register</h2>
+
+                <p>
+                    Monitor saved predictions, update actual outcomes,
+                    or request a management analysis from AI.
+                </p>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shipment</th>
+                            <th>Route</th>
+                            <th>Distance</th>
+                            <th>Priority</th>
+                            <th>Probability</th>
+                            <th>Risk</th>
+                            <th>Prediction</th>
+                            <th>Actual Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="shipmentTableBody">
+                        <tr>
+                            <td
+                                colspan="9"
+                                class="empty-table"
+                            >
+                                Loading shipments...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div id="aiModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>AI Management Analysis</h2>
+
+                <button
+                    class="close-button"
+                    type="button"
+                    onclick="closeAiModal()"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+            </div>
+
+            <div id="aiModalBody" class="modal-body">
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+                    <p>Generating management analysis...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const predictionForm =
+            document.getElementById("predictionForm");
+
+        const predictButton =
+            document.getElementById("predictButton");
+
+        const formError =
+            document.getElementById("formError");
+
+        const aiModal =
+            document.getElementById("aiModal");
+
+        const aiModalBody =
+            document.getElementById("aiModalBody");
+
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        function normalizeRisk(riskLevel) {
+            return String(
+                riskLevel || "unknown"
+            ).toLowerCase();
+        }
+
+
+        function getRiskClass(riskLevel) {
+            const risk = normalizeRisk(riskLevel);
+
+            if (risk === "low") {
+                return "risk-low";
+            }
+
+            if (risk === "medium") {
+                return "risk-medium";
+            }
+
+            if (risk === "high") {
+                return "risk-high";
+            }
+
+            return "risk-unknown";
+        }
+
+
+        function getFillClass(riskLevel) {
+            const risk = normalizeRisk(riskLevel);
+
+            if (risk === "low") {
+                return "fill-low";
+            }
+
+            if (risk === "medium") {
+                return "fill-medium";
+            }
+
+            return "fill-high";
+        }
+
+
+        function formatStage(value) {
+            return String(value || "")
+                .replaceAll("_", " ")
+                .replace(/\b\w/g, function (letter) {
+                    return letter.toUpperCase();
+                });
+        }
+
+
+        function showFormError(message) {
+            formError.textContent = message;
+            formError.classList.add("visible");
+        }
+
+
+        function clearFormError() {
+            formError.textContent = "";
+            formError.classList.remove("visible");
+        }
+
+
+        predictionForm.addEventListener(
+            "submit",
+            async function (event) {
+                event.preventDefault();
+                clearFormError();
+
+                predictButton.disabled = true;
+                predictButton.textContent =
+                    "Calculating prediction...";
+
+                const shipmentData = {
+                    shipment_number:
+                        document.getElementById(
+                            "shipmentNumber"
+                        ).value.trim(),
+
+                    origin:
+                        document.getElementById(
+                            "origin"
+                        ).value.trim(),
+
+                    destination:
+                        document.getElementById(
+                            "destination"
+                        ).value.trim(),
+
+                    distance_km:
+                        Number(
+                            document.getElementById(
+                                "distance"
+                            ).value
+                        ),
+
+                    dispatch_delay_hours:
+                        Number(
+                            document.getElementById(
+                                "dispatchDelay"
+                            ).value
+                        ),
+
+                    days_remaining:
+                        Number(
+                            document.getElementById(
+                                "daysRemaining"
+                            ).value
+                        ),
+
+                    documentation_complete:
+                        document.getElementById(
+                            "documentationComplete"
+                        ).checked,
+
+                    vehicle_available:
+                        document.getElementById(
+                            "vehicleAvailable"
+                        ).checked,
+
+                    priority:
+                        document.getElementById(
+                            "priority"
+                        ).value,
+
+                    transport_type:
+                        document.getElementById(
+                            "transportType"
+                        ).value,
+
+                    current_stage:
+                        document.getElementById(
+                            "currentStage"
+                        ).value
+                };
+
+                try {
+                    const response = await fetch(
+                        "/shipments/predict",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+                            body: JSON.stringify(
+                                shipmentData
+                            )
+                        }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(
+                            data.detail ||
+                            "Prediction request failed."
+                        );
+                    }
+
+                    const shipment =
+                        data.shipment || data;
+
+                    displayPrediction(shipment);
+                    await loadShipments();
+                    prepareNextShipmentNumber(
+                        shipment.shipment_number
+                    );
+                } catch (error) {
+                    showFormError(error.message);
+                } finally {
+                    predictButton.disabled = false;
+                    predictButton.textContent =
+                        "Predict Delay Risk";
+                }
+            }
+        );
+
+
+        function displayPrediction(shipment) {
+            const probability =
+                Number(
+                    shipment.delay_probability || 0
+                );
+
+            const riskLevel =
+                shipment.risk_level || "Unknown";
+
+            document.getElementById(
+                "resultPlaceholder"
+            ).style.display = "none";
+
+            document.getElementById(
+                "resultContent"
+            ).classList.add("visible");
+
+            document.getElementById(
+                "resultShipmentNumber"
+            ).textContent =
+                shipment.shipment_number;
+
+            const badge =
+                document.getElementById(
+                    "resultRiskBadge"
+                );
+
+            badge.textContent = riskLevel;
+            badge.className =
+                "risk-badge " +
+                getRiskClass(riskLevel);
+
+            document.getElementById(
+                "resultProbability"
+            ).textContent =
+                probability.toFixed(1) + "%";
+
+            const progressFill =
+                document.getElementById(
+                    "probabilityFill"
+                );
+
+            progressFill.className =
+                "progress-fill " +
+                getFillClass(riskLevel);
+
+            requestAnimationFrame(function () {
+                progressFill.style.width =
+                    Math.min(
+                        Math.max(probability, 0),
+                        100
+                    ) + "%";
+            });
+
+            document.getElementById(
+                "resultPrediction"
+            ).textContent =
+                shipment.prediction ||
+                "Prediction unavailable";
+
+            renderList(
+                "riskFactors",
+                shipment.risk_factors
+            );
+
+            renderList(
+                "recommendedActions",
+                shipment.recommended_actions
+            );
+        }
+
+
+        function parseList(value) {
+            if (Array.isArray(value)) {
+                return value;
+            }
+
+            if (!value) {
+                return [];
+            }
+
+            try {
+                const parsed = JSON.parse(value);
+
+                return Array.isArray(parsed)
+                    ? parsed
+                    : [];
+            } catch {
+                return [];
+            }
+        }
+
+
+        function renderList(elementId, items) {
+            const element =
+                document.getElementById(elementId);
+
+            const values = parseList(items);
+
+            if (values.length === 0) {
+                element.innerHTML =
+                    "<li>No information available.</li>";
+                return;
+            }
+
+            element.innerHTML = values.map(
+                function (item) {
+                    return (
+                        "<li>" +
+                        escapeHtml(item) +
+                        "</li>"
+                    );
+                }
+            ).join("");
+        }
+
+
+        async function loadShipments() {
+            const tableBody =
+                document.getElementById(
+                    "shipmentTableBody"
+                );
+
+            try {
+                const response = await fetch(
+                    "/shipments"
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Could not load shipments."
+                    );
+                }
+
+                const shipments =
+                    Array.isArray(data)
+                        ? data
+                        : (
+                            data.shipments || []
+                        );
+
+                updateStatistics(shipments);
+                renderShipmentTable(shipments);
+            } catch (error) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="9"
+                            class="empty-table"
+                        >
+                            ${escapeHtml(error.message)}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+
+        function updateStatistics(shipments) {
+            const highCount = shipments.filter(
+                function (shipment) {
+                    return normalizeRisk(
+                        shipment.risk_level
+                    ) === "high";
+                }
+            ).length;
+
+            const mediumCount = shipments.filter(
+                function (shipment) {
+                    return normalizeRisk(
+                        shipment.risk_level
+                    ) === "medium";
+                }
+            ).length;
+
+            const lowCount = shipments.filter(
+                function (shipment) {
+                    return normalizeRisk(
+                        shipment.risk_level
+                    ) === "low";
+                }
+            ).length;
+
+            const probabilityTotal =
+                shipments.reduce(
+                    function (total, shipment) {
+                        return total +
+                            Number(
+                                shipment
+                                    .delay_probability ||
+                                0
+                            );
+                    },
+                    0
+                );
+
+            const average =
+                shipments.length > 0
+                    ? probabilityTotal /
+                        shipments.length
+                    : 0;
+
+            document.getElementById(
+                "totalShipments"
+            ).textContent = shipments.length;
+
+            document.getElementById(
+                "highRisk"
+            ).textContent = highCount;
+
+            document.getElementById(
+                "mediumRisk"
+            ).textContent = mediumCount;
+
+            document.getElementById(
+                "lowRisk"
+            ).textContent = lowCount;
+
+            document.getElementById(
+                "averageRisk"
+            ).textContent =
+                average.toFixed(1) + "%";
+        }
+
+
+        function renderShipmentTable(shipments) {
+            const tableBody =
+                document.getElementById(
+                    "shipmentTableBody"
+                );
+
+            if (shipments.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="9"
+                            class="empty-table"
+                        >
+                            No shipment predictions saved yet.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = shipments.map(
+                function (shipment) {
+                    const probability =
+                        Number(
+                            shipment
+                                .delay_probability ||
+                            0
+                        ).toFixed(1);
+
+                    const actualStatus =
+                        shipment.actual_status ||
+                        "unknown";
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>
+                                    ${escapeHtml(
+                                        shipment
+                                            .shipment_number
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    shipment.origin
+                                )}
+                                →
+                                ${escapeHtml(
+                                    shipment.destination
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    shipment.distance_km
+                                )} km
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    formatStage(
+                                        shipment.priority
+                                    )
+                                )}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${probability}%
+                                </strong>
+                            </td>
+
+                            <td>
+                                <span
+                                    class="
+                                        risk-badge
+                                        ${getRiskClass(
+                                            shipment.risk_level
+                                        )}
+                                    "
+                                >
+                                    ${escapeHtml(
+                                        shipment.risk_level
+                                    )}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(
+                                    shipment.prediction
+                                )}
+                            </td>
+
+                            <td>
+                                <select
+                                    class="status-select"
+                                    onchange="
+                                        updateActualStatus(
+                                            ${shipment.id},
+                                            this.value
+                                        )
+                                    "
+                                >
+                                    ${statusOption(
+                                        "unknown",
+                                        actualStatus,
+                                        "Unknown"
+                                    )}
+
+                                    ${statusOption(
+                                        "on_time",
+                                        actualStatus,
+                                        "On Time"
+                                    )}
+
+                                    ${statusOption(
+                                        "delayed",
+                                        actualStatus,
+                                        "Delayed"
+                                    )}
+
+                                    ${statusOption(
+                                        "cancelled",
+                                        actualStatus,
+                                        "Cancelled"
+                                    )}
+                                </select>
+                            </td>
+
+                            <td>
+                                <div class="table-actions">
+                                    <button
+                                        type="button"
+                                        class="
+                                            action-button
+                                            view-button
+                                        "
+                                        onclick='viewPrediction(
+                                            ${JSON.stringify(
+                                                shipment
+                                            )}
+                                        )'
+                                    >
+                                        View
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            action-button
+                                            ai-button
+                                        "
+                                        onclick="
+                                            generateAiAnalysis(
+                                                ${shipment.id}
+                                            )
+                                        "
+                                    >
+                                        AI Analysis
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            action-button
+                                            delete-button
+                                        "
+                                        onclick="
+                                            deleteShipment(
+                                                ${shipment.id}
+                                            )
+                                        "
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            ).join("");
+        }
+
+
+        function statusOption(
+            value,
+            selectedValue,
+            label
+        ) {
+            const selected =
+                value === selectedValue
+                    ? "selected"
+                    : "";
+
+            return `
+                <option
+                    value="${value}"
+                    ${selected}
+                >
+                    ${label}
+                </option>
+            `;
+        }
+
+
+        function viewPrediction(shipment) {
+            displayPrediction(shipment);
+
+            window.scrollTo({
+                top: 250,
+                behavior: "smooth"
+            });
+        }
+
+
+        async function updateActualStatus(
+            shipmentId,
+            status
+        ) {
+            try {
+                const response = await fetch(
+                    `/shipments/${shipmentId}/actual-status`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            actual_status: status
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Could not update status."
+                    );
+                }
+            } catch (error) {
+                alert(error.message);
+                await loadShipments();
+            }
+        }
+
+
+        async function deleteShipment(shipmentId) {
+            const confirmed = confirm(
+                "Are you sure you want to delete " +
+                "this shipment?"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `/shipments/${shipmentId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Could not delete shipment."
+                    );
+                }
+
+                await loadShipments();
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+
+        async function generateAiAnalysis(
+            shipmentId
+        ) {
+            aiModal.classList.add("visible");
+
+            aiModalBody.innerHTML = `
+                <div class="ai-loading">
+                    <div class="spinner"></div>
+
+                    <p>
+                        Generating management analysis...
+                    </p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(
+                    `/shipments/${shipmentId}/ai-analysis`,
+                    {
+                        method: "POST"
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "AI analysis request failed."
+                    );
+                }
+
+                displayAiAnalysis(data);
+            } catch (error) {
+                aiModalBody.innerHTML = `
+                    <div class="error-message visible">
+                        ${escapeHtml(error.message)}
+                    </div>
+                `;
+            }
+        }
+
+
+        function displayAiAnalysis(data) {
+            const analysis =
+                data.ai_analysis || {};
+
+            const urgency =
+                String(
+                    analysis.urgency || "unknown"
+                ).toLowerCase();
+
+            const actions =
+                Array.isArray(
+                    analysis.recommended_actions
+                )
+                    ? analysis.recommended_actions
+                    : [];
+
+            aiModalBody.innerHTML = `
+                <div class="ai-summary">
+                    <div class="ai-summary-item">
+                        <span class="ai-summary-label">
+                            Shipment
+                        </span>
+
+                        <span class="ai-summary-value">
+                            ${escapeHtml(
+                                data.shipment_number
+                            )}
+                        </span>
+                    </div>
+
+                    <div class="ai-summary-item">
+                        <span class="ai-summary-label">
+                            Delay Probability
+                        </span>
+
+                        <span class="ai-summary-value">
+                            ${Number(
+                                data.delay_probability || 0
+                            ).toFixed(1)}%
+                        </span>
+                    </div>
+
+                    <div class="ai-summary-item">
+                        <span class="ai-summary-label">
+                            Urgency
+                        </span>
+
+                        <span
+                            class="
+                                urgency
+                                urgency-${escapeHtml(urgency)}
+                            "
+                        >
+                            ${escapeHtml(urgency)}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Executive Summary</h3>
+
+                    <p>
+                        ${escapeHtml(
+                            analysis.executive_summary
+                        )}
+                    </p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Operational Impact</h3>
+
+                    <p>
+                        ${escapeHtml(
+                            analysis.operational_impact
+                        )}
+                    </p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Management Recommendation</h3>
+
+                    <p>
+                        ${escapeHtml(
+                            analysis
+                                .management_recommendation
+                        )}
+                    </p>
+                </div>
+
+                <div class="analysis-section">
+                    <h3>Prioritized Recommended Actions</h3>
+
+                    <ol class="analysis-actions">
+                        ${
+                            actions.length > 0
+                                ? actions.map(
+                                    function (action) {
+                                        return (
+                                            "<li>" +
+                                            escapeHtml(
+                                                action
+                                            ) +
+                                            "</li>"
+                                        );
+                                    }
+                                ).join("")
+                                : (
+                                    "<li>" +
+                                    "No actions available." +
+                                    "</li>"
+                                )
+                        }
+                    </ol>
+                </div>
+            `;
+        }
+
+
+        function closeAiModal() {
+            aiModal.classList.remove("visible");
+        }
+
+
+        aiModal.addEventListener(
+            "click",
+            function (event) {
+                if (event.target === aiModal) {
+                    closeAiModal();
+                }
+            }
+        );
+
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+                if (event.key === "Escape") {
+                    closeAiModal();
+                }
+            }
+        );
+
+
+        function prepareNextShipmentNumber(
+            currentNumber
+        ) {
+            const match =
+                String(currentNumber).match(
+                    /^(.*?)(\d+)$/
+                );
+
+            if (!match) {
+                return;
+            }
+
+            const prefix = match[1];
+            const number = Number(match[2]) + 1;
+            const digits = match[2].length;
+
+            document.getElementById(
+                "shipmentNumber"
+            ).value =
+                prefix +
+                String(number).padStart(
+                    digits,
+                    "0"
+                );
+        }
+
+
+        loadShipments();
+    </script>
+</body>
+</html>

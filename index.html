@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AI Operations Manager</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a, #1d4ed8);
+            color: white;
+            padding: 32px 20px;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #dbeafe;
+        }
+
+        main {
+            width: min(1400px, 94%);
+            margin: 24px auto 50px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card,
+        .panel {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .stat-card {
+            padding: 20px;
+        }
+
+        .stat-card span {
+            display: block;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card strong {
+            font-size: 30px;
+            color: #1d4ed8;
+        }
+
+        .panel {
+            padding: 22px;
+            margin-bottom: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 8px;
+        }
+
+        .panel-description {
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(210px, 1fr));
+            gap: 14px;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font: inherit;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #bfdbfe;
+            border-color: #2563eb;
+        }
+
+        .button {
+            display: inline-block;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            color: white;
+        }
+
+        .primary-button:hover {
+            background: #1d4ed8;
+        }
+
+        .green-button {
+            background: #059669;
+            color: white;
+        }
+
+        .green-button:hover {
+            background: #047857;
+        }
+
+        .dark-button {
+            background: #0f172a;
+            color: white;
+        }
+
+        .dark-button:hover {
+            background: #1e293b;
+        }
+
+        .danger-button {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .danger-button:hover {
+            background: #fecaca;
+        }
+
+        .small-button {
+            padding: 8px 12px;
+            font-size: 13px;
+        }
+
+        .full-button {
+            width: 100%;
+            margin-top: 14px;
+        }
+
+        .report-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1050px;
+        }
+
+        th,
+        td {
+            padding: 13px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f8fafc;
+            color: #475569;
+            font-size: 13px;
+        }
+
+        td {
+            font-size: 14px;
+        }
+
+        .task-title,
+        .employee-name {
+            font-weight: bold;
+        }
+
+        .task-description,
+        .employee-email {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.4;
+            margin-top: 5px;
+        }
+
+        .task-description {
+            max-width: 300px;
+        }
+
+        .priority {
+            display: inline-block;
+            border-radius: 20px;
+            padding: 5px 9px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .priority-high {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .action-buttons {
+            display: grid;
+            gap: 8px;
+            min-width: 90px;
+        }
+
+        .report-box {
+            margin-top: 16px;
+            padding: 18px;
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            min-height: 70px;
+        }
+
+        .empty-message {
+            padding: 24px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .status-message {
+            margin-top: 12px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        @media (max-width: 700px) {
+            header {
+                padding: 25px 16px;
+            }
+
+            header h1 {
+                font-size: 25px;
+            }
+
+            main {
+                width: 95%;
+            }
+
+            .panel {
+                padding: 17px;
+            }
+
+            .report-buttons {
+                display: grid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>AI Operations Manager</h1>
+
+        <p>
+            Create, assign, track, and report operational tasks.
+        </p>
+    </header>
+
+    <main>
+        <section class="stats">
+            <div class="stat-card">
+                <span>Total Tasks</span>
+                <strong id="totalTasks">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Pending Tasks</span>
+                <strong id="pendingTasks">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Completed Tasks</span>
+                <strong id="completedTasks">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Assigned Tasks</span>
+                <strong id="assignedTasks">0</strong>
+            </div>
+
+            <div class="stat-card">
+                <span>Total Employees</span>
+                <strong id="totalEmployees">0</strong>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>AI Task Creator</h2>
+
+            <p class="panel-description">
+                Describe the required work and AI will convert it
+                into a structured task.
+            </p>
+
+            <textarea
+                id="aiInstruction"
+                placeholder="Example: Create a high-priority task to prepare the weekly operations report by 2026-10-15"
+            ></textarea>
+
+            <button
+                class="button primary-button full-button"
+                onclick="createTaskWithAI()"
+            >
+                Create Task with AI
+            </button>
+
+            <div
+                id="aiTaskMessage"
+                class="status-message"
+            ></div>
+        </section>
+
+        <section class="panel">
+            <h2>Employee Management</h2>
+
+            <p class="panel-description">
+                Add employees before assigning operational tasks.
+            </p>
+
+            <div class="form-grid">
+                <input
+                    id="employeeName"
+                    type="text"
+                    placeholder="Employee name"
+                >
+
+                <input
+                    id="employeeEmail"
+                    type="email"
+                    placeholder="Email address"
+                >
+
+                <select id="employeeDepartment">
+                    <option value="General">General</option>
+                    <option value="Operations">Operations</option>
+                    <option value="IT">IT</option>
+                    <option value="Maintenance">Maintenance</option>
+
+                    <option value="Human Resources">
+                        Human Resources
+                    </option>
+
+                    <option value="Customer Service">
+                        Customer Service
+                    </option>
+
+                    <option value="Logistics">Logistics</option>
+                </select>
+
+                <input
+                    id="employeeJobTitle"
+                    type="text"
+                    placeholder="Job title"
+                >
+            </div>
+
+            <button
+                class="button green-button full-button"
+                onclick="addEmployee()"
+            >
+                Add Employee
+            </button>
+
+            <div
+                id="employeeMessage"
+                class="status-message"
+            ></div>
+
+            <div
+                class="table-container"
+                style="margin-top: 20px;"
+            >
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Department</th>
+                            <th>Job Title</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="employeesTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Task Management</h2>
+
+            <p class="panel-description">
+                Assign tasks to departments and employees,
+                then update their progress.
+            </p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Task</th>
+                            <th>Priority</th>
+                            <th>Department</th>
+                            <th>Assigned Employee</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tasksTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Operations Reports</h2>
+
+            <p class="panel-description">
+                Generate an AI summary or download a structured
+                PDF report for management.
+            </p>
+
+            <div class="report-buttons">
+                <button
+                    class="button primary-button"
+                    onclick="generateReport()"
+                >
+                    Generate AI Report
+                </button>
+
+                <a
+                    class="button dark-button"
+                    href="/reports/pdf"
+                    target="_blank"
+                >
+                    Download PDF Report
+                </a>
+            </div>
+
+            <div
+                id="reportBox"
+                class="report-box"
+            >
+                No AI report generated yet.
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const departments = [
+            "General",
+            "Operations",
+            "IT",
+            "Maintenance",
+            "Human Resources",
+            "Customer Service",
+            "Logistics"
+        ];
+
+        let tasks = [];
+        let employees = [];
+
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        async function loadDashboard() {
+            try {
+                const responses = await Promise.all([
+                    fetch("/tasks"),
+                    fetch("/employees"),
+                    fetch("/reports/summary")
+                ]);
+
+                if (responses.some(response => !response.ok)) {
+                    throw new Error(
+                        "Could not load dashboard data"
+                    );
+                }
+
+                tasks = await responses[0].json();
+                employees = await responses[1].json();
+
+                const summary = await responses[2].json();
+
+                updateStatistics(summary);
+                displayEmployees();
+                displayTasks();
+
+            } catch (error) {
+                alert(
+                    "Error loading dashboard: " + error.message
+                );
+            }
+        }
+
+
+        function updateStatistics(summary) {
+            document.getElementById(
+                "totalTasks"
+            ).textContent = summary.total_tasks ?? 0;
+
+            document.getElementById(
+                "pendingTasks"
+            ).textContent = summary.pending_tasks ?? 0;
+
+            document.getElementById(
+                "completedTasks"
+            ).textContent = summary.completed_tasks ?? 0;
+
+            document.getElementById(
+                "assignedTasks"
+            ).textContent = summary.assigned_tasks ?? 0;
+
+            document.getElementById(
+                "totalEmployees"
+            ).textContent = summary.total_employees ?? 0;
+        }
+
+
+        function displayEmployees() {
+            const tableBody = document.getElementById(
+                "employeesTableBody"
+            );
+
+            if (employees.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty-message">
+                            No employees added yet.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tableBody.innerHTML = employees.map(
+                employee => `
+                    <tr>
+                        <td>
+                            <div class="employee-name">
+                                ${escapeHtml(employee.name)}
+                            </div>
+
+                            <div class="employee-email">
+                                ${escapeHtml(
+                                    employee.email || "No email"
+                                )}
+                            </div>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(employee.department)}
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                employee.job_title || "Not specified"
+                            )}
+                        </td>
+
+                        <td>
+                            <button
+                                class="button danger-button small-button"
+                                onclick="deleteEmployee(${employee.id})"
+                            >
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                `
+            ).join("");
+        }
+
+
+        function departmentOptions(selectedDepartment) {
+            return departments.map(
+                department => `
+                    <option
+                        value="${escapeHtml(department)}"
+                        ${
+                            department === selectedDepartment
+                                ? "selected"
+                                : ""
+                        }
+                    >
+                        ${escapeHtml(department)}
+                    </option>
+                `
+            ).join("");
+        }
+
+
+        function employeeOptions(
+            department,
+            selectedEmployee
+        ) {
+            const filteredEmployees = employees.filter(
+                employee =>
+                    employee.department === department
+            );
+
+            let options = `
+                <option
+                    value="Unassigned"
+                    ${
+                        selectedEmployee === "Unassigned"
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    Unassigned
+                </option>
+            `;
+
+            options += filteredEmployees.map(
+                employee => `
+                    <option
+                        value="${escapeHtml(employee.name)}"
+                        ${
+                            employee.name === selectedEmployee
+                                ? "selected"
+                                : ""
+                        }
+                    >
+                        ${escapeHtml(employee.name)}
+                    </option>
+                `
+            ).join("");
+
+            const employeeExists = filteredEmployees.some(
+                employee =>
+                    employee.name === selectedEmployee
+            );
+
+            if (
+                selectedEmployee &&
+                selectedEmployee !== "Unassigned" &&
+                !employeeExists
+            ) {
+                options += `
+                    <option
+                        value="${escapeHtml(selectedEmployee)}"
+                        selected
+                    >
+                        ${escapeHtml(selectedEmployee)}
+                    </option>
+                `;
+            }
+
+            return options;
+        }
+
+
+        function displayTasks() {
+            const tableBody = document.getElementById(
+                "tasksTableBody"
+            );
+
+            if (tasks.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="empty-message">
+                            No tasks available.
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            tableBody.innerHTML = tasks.map(
+                task => `
+                    <tr>
+                        <td>
+                            <div class="task-title">
+                                ${escapeHtml(task.title)}
+                            </div>
+
+                            <div class="task-description">
+                                ${escapeHtml(
+                                    task.description || ""
+                                )}
+                            </div>
+                        </td>
+
+                        <td>
+                            <span
+                                class="priority priority-${
+                                    escapeHtml(task.priority)
+                                }"
+                            >
+                                ${escapeHtml(task.priority)}
+                            </span>
+                        </td>
+
+                        <td>
+                            <select
+                                id="department-${task.id}"
+                                onchange="departmentChanged(${task.id})"
+                            >
+                                ${departmentOptions(
+                                    task.department || "General"
+                                )}
+                            </select>
+                        </td>
+
+                        <td>
+                            <select id="assignee-${task.id}">
+                                ${employeeOptions(
+                                    task.department || "General",
+                                    task.assignee || "Unassigned"
+                                )}
+                            </select>
+                        </td>
+
+                        <td>
+                            ${escapeHtml(
+                                task.due_date || "No due date"
+                            )}
+                        </td>
+
+                        <td>
+                            <select
+                                id="status-${task.id}"
+                                onchange="updateTaskStatus(${task.id})"
+                            >
+                                <option
+                                    value="pending"
+                                    ${
+                                        task.status === "pending"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Pending
+                                </option>
+
+                                <option
+                                    value="in_progress"
+                                    ${
+                                        task.status === "in_progress"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    In Progress
+                                </option>
+
+                                <option
+                                    value="completed"
+                                    ${
+                                        task.status === "completed"
+                                            ? "selected"
+                                            : ""
+                                    }
+                                >
+                                    Completed
+                                </option>
+                            </select>
+                        </td>
+
+                        <td>
+                            <div class="action-buttons">
+                                <button
+                                    class="button primary-button small-button"
+                                    onclick="saveAssignment(${task.id})"
+                                >
+                                    Save
+                                </button>
+
+                                <button
+                                    class="button danger-button small-button"
+                                    onclick="deleteTask(${task.id})"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `
+            ).join("");
+        }
+
+
+        function departmentChanged(taskId) {
+            const department = document.getElementById(
+                `department-${taskId}`
+            ).value;
+
+            document.getElementById(
+                `assignee-${taskId}`
+            ).innerHTML = employeeOptions(
+                department,
+                "Unassigned"
+            );
+        }
+
+
+        async function addEmployee() {
+            const name = document.getElementById(
+                "employeeName"
+            ).value.trim();
+
+            const email = document.getElementById(
+                "employeeEmail"
+            ).value.trim();
+
+            const department = document.getElementById(
+                "employeeDepartment"
+            ).value;
+
+            const jobTitle = document.getElementById(
+                "employeeJobTitle"
+            ).value.trim();
+
+            const message = document.getElementById(
+                "employeeMessage"
+            );
+
+            if (!name) {
+                message.textContent =
+                    "Please enter the employee name.";
+
+                return;
+            }
+
+            message.textContent = "Adding employee...";
+
+            try {
+                const response = await fetch(
+                    "/employees",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            name,
+                            email,
+                            department,
+                            job_title: jobTitle
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not add employee"
+                    );
+                }
+
+                document.getElementById(
+                    "employeeName"
+                ).value = "";
+
+                document.getElementById(
+                    "employeeEmail"
+                ).value = "";
+
+                document.getElementById(
+                    "employeeJobTitle"
+                ).value = "";
+
+                message.textContent =
+                    "Employee added successfully.";
+
+                await loadDashboard();
+
+            } catch (error) {
+                message.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+
+        async function deleteEmployee(employeeId) {
+            if (
+                !confirm(
+                    "Are you sure you want to delete this employee?"
+                )
+            ) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `/employees/${employeeId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not delete employee"
+                    );
+                }
+
+                await loadDashboard();
+
+            } catch (error) {
+                alert(
+                    "Error deleting employee: " +
+                    error.message
+                );
+            }
+        }
+
+
+        async function saveAssignment(taskId) {
+            const department = document.getElementById(
+                `department-${taskId}`
+            ).value;
+
+            const assignee = document.getElementById(
+                `assignee-${taskId}`
+            ).value;
+
+            try {
+                const response = await fetch(
+                    `/tasks/${taskId}/assignment`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            department,
+                            assignee
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not save assignment"
+                    );
+                }
+
+                alert(
+                    "Task assignment saved successfully."
+                );
+
+                await loadDashboard();
+
+            } catch (error) {
+                alert(
+                    "Error saving assignment: " +
+                    error.message
+                );
+            }
+        }
+
+
+        async function updateTaskStatus(taskId) {
+            const status = document.getElementById(
+                `status-${taskId}`
+            ).value;
+
+            try {
+                const response = await fetch(
+                    `/tasks/${taskId}/status`,
+                    {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            status
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not update status"
+                    );
+                }
+
+                await loadDashboard();
+
+            } catch (error) {
+                alert(
+                    "Error updating status: " +
+                    error.message
+                );
+            }
+        }
+
+
+        async function deleteTask(taskId) {
+            if (
+                !confirm(
+                    "Are you sure you want to delete this task?"
+                )
+            ) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `/tasks/${taskId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not delete task"
+                    );
+                }
+
+                await loadDashboard();
+
+            } catch (error) {
+                alert(
+                    "Error deleting task: " +
+                    error.message
+                );
+            }
+        }
+
+
+        async function createTaskWithAI() {
+            const instruction = document.getElementById(
+                "aiInstruction"
+            ).value.trim();
+
+            const message = document.getElementById(
+                "aiTaskMessage"
+            );
+
+            if (!instruction) {
+                message.textContent =
+                    "Please enter a task instruction.";
+
+                return;
+            }
+
+            message.textContent =
+                "AI is creating the task...";
+
+            try {
+                const response = await fetch(
+                    "/agent/create-task",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            instruction
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "AI could not create the task"
+                    );
+                }
+
+                document.getElementById(
+                    "aiInstruction"
+                ).value = "";
+
+                message.textContent =
+                    "AI task created successfully.";
+
+                await loadDashboard();
+
+            } catch (error) {
+                message.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+
+        async function generateReport() {
+            const reportBox = document.getElementById(
+                "reportBox"
+            );
+
+            reportBox.textContent =
+                "AI is generating the report...";
+
+            try {
+                const response = await fetch(
+                    "/agent/report"
+                );
+
+                if (!response.ok) {
+                    const data = await response.json();
+
+                    throw new Error(
+                        data.detail ||
+                        "Could not generate report"
+                    );
+                }
+
+                const data = await response.json();
+
+                reportBox.textContent = data.report;
+
+            } catch (error) {
+                reportBox.textContent =
+                    "Error: " + error.message;
+            }
+        }
+
+
+        loadDashboard();
+    </script>
+</body>
+</html>
